@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Palette Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #888;
+            margin-bottom: 3rem;
+        }
+
+        .palette-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 20px;
+            margin-bottom: 3rem;
+        }
+
+        .color-block {
+            aspect-ratio: 1;
+            border-radius: 16px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .color-block:hover {
+            transform: translateY(-5px) scale(1.05);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 12px;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .color-block:hover .color-info {
+            transform: translateY(0);
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .toast {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            border: 1px solid rgba(102, 126, 234, 0.5);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .instructions {
+            margin-top: 2rem;
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .palette-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .generate-btn {
+                padding: 14px 28px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .palette-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Color Palette Generator</h1>
+        <p class="subtitle">Generate beautiful color combinations • Click any color to copy</p>
+        
+        <div class="palette-container" id="paletteContainer">
+            <!-- Color blocks will be generated here -->
+        </div>
+        
+        <button class="generate-btn" onclick="generatePalette()">
+            Generate New Palette
+        </button>
+        
+        <p class="instructions">
+            🎨 Click any color block to copy its hex code to clipboard<br>
+            ⚡ Press spacebar to generate a new palette
+        </p>
+    </div>
+
+    <div class="toast" id="toast">
+        Color copied to clipboard!
+    </div>
+
+    <script>
+        // Generate a random hex color
+        function generateRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        // Generate palette of 5 colors
+        function generatePalette() {
+            const container = document.getElementById('paletteContainer');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 5; i++) {
+                const color = generateRandomColor();
+                const colorBlock = document.createElement('div');
+                colorBlock.className = 'color-block';
+                colorBlock.style.background = color;
+                colorBlock.onclick = () => copyToClipboard(color);
+                
+                const colorInfo = document.createElement('div');
+                colorInfo.className = 'color-info';
+                colorInfo.textContent = color;
+                
+                colorBlock.appendChild(colorInfo);
+                container.appendChild(colorBlock);
+            }
+        }
+
+        // Copy color to clipboard
+        async function copyToClipboard(color) {
+            try {
+                await navigator.clipboard.writeText(color);
+                showToast();
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = color;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast();
+            }
+        }
+
+        // Show toast notification
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Keyboard shortcut - spacebar to generate new palette
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && e.target === document.body) {
+                e.preventDefault();
+                generatePalette();
+            }
+        });
+
+        // Generate initial palette on page load
+        generatePalette();
+    </script>
+</body>
+</html>
